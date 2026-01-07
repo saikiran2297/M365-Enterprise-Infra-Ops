@@ -1,0 +1,11 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "projectName": { "value": "m365infralab" },
+    "environment": { "value": "dev" },
+    "deployJumpHost": { "value": true },
+    "adminUsername": { "value": "azureadmin" },
+    "adminPassword": { "value": "REPLACE_ME_WITH_A_SECURE_PASSWORD" }
+  }
+}

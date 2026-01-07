@@ -1,0 +1,35 @@
+// ==============================
+// Log Analytics Query Library
+// ==============================
+
+// 1) Heartbeat by computer (requires AMA/agent data)
+Heartbeat
+| summarize LastSeen=max(TimeGenerated) by Computer
+| order by LastSeen desc
+
+// 2) Recent failed sign-ins (if Entra sign-in logs are connected)
+SigninLogs
+| where TimeGenerated > ago(24h)
+| where ResultType != 0
+| project TimeGenerated, UserPrincipalName, AppDisplayName, IPAddress, ResultType, ResultDescription
+| order by TimeGenerated desc
+
+// 3) Azure Activity: who changed RBAC / role assignments
+AzureActivity
+| where TimeGenerated > ago(7d)
+| where OperationNameValue has_any ("roleAssignments", "Microsoft.Authorization/roleAssignments")
+| project TimeGenerated, Caller, OperationNameValue, ActivityStatusValue, ResourceGroup, ResourceId
+| order by TimeGenerated desc
+
+// 4) Top denied flows (if NSG flow logs integrated; table may vary)
+AzureNetworkAnalytics_CL
+| where TimeGenerated > ago(24h)
+| where FlowStatus_s == "D"
+| summarize Denies=count() by SrcIP_s, DestIP_s, DestPort_s
+| order by Denies desc
+
+// 5) VM availability issues (if ResourceHealth data is present)
+ResourceHealth
+| where TimeGenerated > ago(7d)
+| project TimeGenerated, ResourceId, CurrentHealthStatus, PreviousHealthStatus, Title
+| order by TimeGenerated desc
